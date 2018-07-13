@@ -204,6 +204,8 @@ type Styles
 type Variations
     = Selected
     | Highlighted
+    | HighlightedCurrent
+    | HighlightedPotentialSuccessor
 
 
 stylesheet =
@@ -239,9 +241,14 @@ stylesheet =
                 , Color.background lightBlue
                 ]
             , Style.variation
-                Highlighted
+                HighlightedCurrent
                 [ Color.border red
                 , Color.background lightRed
+                ]
+            , Style.variation
+                HighlightedPotentialSuccessor
+                [ Color.border green
+                , Color.background lightGreen
                 ]
             ]
         , Style.style TableHeader
@@ -252,7 +259,7 @@ stylesheet =
         , Style.style Successor
             [ Font.size 18
             , Style.prop "cursor" "pointer"
-            , Style.variation Highlighted [ Color.text red ]
+            , Style.variation Highlighted [ Color.background lightGrey ]
             ]
         ]
 
@@ -277,7 +284,10 @@ viewParcelCell highlighted selected ({ boundingBox } as parcel) =
                 ParcelStyle
                 [ onClick (SelectParcel parcel)
                 , vary Selected (selected == Just parcel)
-                , vary Highlighted (List.member highlighted (List.map (\c -> Just c) parcel.crops))
+                , vary HighlightedCurrent (List.member highlighted (List.map (\c -> Just c) parcel.crops))
+                , vary
+                    HighlightedPotentialSuccessor
+                    (List.member highlighted (successors parcel.crops |> List.map (\c -> Just c)))
                 ]
                 empty
         }
@@ -309,7 +319,7 @@ viewSelection highlighted parcel =
               , parcel.crops
                     |> successors
                     |> List.map (viewSuccessor highlighted)
-                    |> column Text [ spacing 16 ]
+                    |> column Text [ spacing 6 ]
               ]
             ]
         ]
@@ -320,6 +330,7 @@ viewSuccessor highlighted crop =
         Successor
         [ verticalCenter
         , spacing 12
+        , paddingXY 12 6
         , onClick (ToggleHighlight crop)
         , vary Highlighted (highlighted == Just crop)
         ]
