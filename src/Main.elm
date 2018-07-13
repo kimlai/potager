@@ -221,10 +221,8 @@ stylesheet =
             , Color.text black
             ]
         , Style.style Grid
-            [ Color.border darkCharcoal
+            [ Color.border darkGrey
             , Border.all 1
-            , Border.right 2
-            , Border.bottom 2
             ]
         , Style.style Cell
             [ Color.border darkGrey
