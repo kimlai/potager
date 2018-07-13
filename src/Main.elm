@@ -181,6 +181,10 @@ type Styles
     | SidePanel
     | H1
     | Text
+    | Table
+    | TableHeader
+    | CropIcon
+    | Successor
 
 
 type Variations
@@ -190,11 +194,17 @@ type Variations
 stylesheet =
     Style.styleSheet
         [ Style.style Main
-            [ Font.typeface [ Font.sansSerif ] ]
+            [ Font.typeface [ Font.sansSerif ]
+            , Font.size 16
+            , Color.text (greyscale 0.6)
+            ]
         , Style.style H1
-            [ Font.size 24 ]
+            [ Font.size 36
+            , Font.weight 600
+            , Color.text black
+            ]
         , Style.style Grid
-            [ Color.border darkGrey
+            [ Color.border darkCharcoal
             , Border.all 1
             , Border.right 2
             , Border.bottom 2
@@ -214,6 +224,13 @@ stylesheet =
                 , Color.background lightBlue
                 ]
             ]
+        , Style.style TableHeader
+            [ Color.text (greyscale 0.7)
+            , Font.weight 600
+            , Font.size 15
+            ]
+        , Style.style Successor
+            [ Font.size 18 ]
         ]
 
 
@@ -251,19 +268,70 @@ viewSidePanel selected =
 viewSelection parcel =
     column
         SidePanel
-        []
-        [ h1 H1 [] (parcel.crops |> List.map displayCropName |> String.join ", " |> text)
-        , el Text [] (text ("Familles : " ++ (parcel.crops |> List.map (family >> toString) |> String.join ", ")))
-        , el Text [] (text ("Catégories alimentaires : " ++ (parcel.crops |> List.map (category >> displayCategoryName) |> String.join ", ")))
-        , el Text [] (text ("Successeurs potentiels : " ++ (parcel.crops |> successors |> List.map displayCropName |> String.join ", ")))
+        [ paddingTop 36, paddingLeft 48 ]
+        [ h1
+            H1
+            [ paddingBottom 24 ]
+            (parcel.crops |> List.map displayCropName |> String.join ", " |> text)
+        , table
+            Table
+            [ spacing 16 ]
+            [ [ el TableHeader [] (text "Familles")
+              , el TableHeader [] (text "Catégories alimentaires")
+              , el TableHeader [] (text "Successeurs potentiels")
+              ]
+            , [ parcel.crops |> List.map (family >> toString) |> String.join ", " |> text
+              , parcel.crops |> List.map (category >> displayCategoryName) |> String.join ", " |> text
+              , parcel.crops
+                    |> successors
+                    |> List.map (\crop -> row Successor [ verticalCenter, spacing 12 ] [ cropIcon crop, crop |> displayCropName |> text ])
+                    |> column Text [ spacing 16 ]
+              ]
+            ]
         ]
+
+
+cropIcon crop =
+    case crop of
+        Tomato ->
+            decorativeImage CropIcon [ width (px 25), height (px 25) ] { src = "/icons/069-tomato.svg" }
+
+        Beetroot ->
+            decorativeImage CropIcon [ width (px 25), height (px 25) ] { src = "/icons/003-turnip-1.svg" }
+
+        Salad ->
+            decorativeImage CropIcon [ width (px 25), height (px 25) ] { src = "/icons/022-leaf.svg" }
+
+        Radish ->
+            decorativeImage CropIcon [ width (px 25), height (px 25) ] { src = "/icons/074-turnip.svg" }
+
+        Squash ->
+            decorativeImage CropIcon [ width (px 25), height (px 25) ] { src = "/icons/008-pumpkin.svg" }
+
+        Bean ->
+            decorativeImage CropIcon [ width (px 25), height (px 25) ] { src = "/icons/066-beans.svg" }
+
+        Peas ->
+            decorativeImage CropIcon [ width (px 25), height (px 25) ] { src = "/icons/013-peas.svg" }
+
+        Carot ->
+            decorativeImage CropIcon [ width (px 25), height (px 25) ] { src = "/icons/039-carrot.svg" }
+
+        Scallion ->
+            decorativeImage CropIcon [ width (px 25), height (px 25) ] { src = "/icons/016-onion.svg" }
+
+        Garlic ->
+            decorativeImage CropIcon [ width (px 25), height (px 25) ] { src = "/icons/028-garlic-2.svg" }
+
+        Shallot ->
+            decorativeImage CropIcon [ width (px 25), height (px 25) ] { src = "/icons/016-onion.svg" }
 
 
 view : Model -> Html Msg
 view { width, height, parcels, selected } =
     layout stylesheet <|
         row Main
-            [ spacing 50 ]
+            [ padding 36 ]
             [ grid Grid
                 []
                 { columns = List.repeat width (px 25)
