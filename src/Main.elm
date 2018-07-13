@@ -42,6 +42,42 @@ type Crop
     | Shallot
 
 
+displayName crop =
+    case crop of
+        Tomato ->
+            "Tomate"
+
+        Beetroot ->
+            "Betterave"
+
+        Salad ->
+            "Salade"
+
+        Radish ->
+            "Radis"
+
+        Squash ->
+            "Courge"
+
+        Bean ->
+            "Haricot"
+
+        Peas ->
+            "Pois"
+
+        Carot ->
+            "Carotte"
+
+        Scallion ->
+            "Ciboule"
+
+        Garlic ->
+            "Ail"
+
+        Shallot ->
+            "Échalotte"
+
+
 type alias BoundingBox =
     { topLeft : ( Int, Int )
     , width : Int
@@ -256,11 +292,11 @@ viewParcelCell selected ({ boundingBox } as parcel) =
 viewSidePanel selected =
     selected
         |> Maybe.map viewSelection
-        |> Maybe.withDefault (text "No parcel selected")
+        |> Maybe.withDefault empty
 
 
 viewSelection parcel =
-    el SidePanel [] (h1 H1 [] (parcel.crops |> List.map toString |> String.join ", " |> text))
+    el SidePanel [] (h1 H1 [] (parcel.crops |> List.map displayName |> String.join ", " |> text))
 
 
 view : Model -> Html Msg
