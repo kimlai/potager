@@ -21,6 +21,7 @@ type alias Model =
     , height : Int
     , parcels : List Parcel
     , selected : Maybe Parcel
+    , highlighted : Maybe Crop
     }
 
 
@@ -42,6 +43,7 @@ init =
     ( { width = 25
       , height = 22
       , selected = Nothing
+      , highlighted = Nothing
       , parcels =
             [ { crops = [ Tomato ]
               , boundingBox =
@@ -160,6 +162,7 @@ init =
 
 type Msg
     = SelectParcel Parcel
+    | ToggleHighlight Crop
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -167,6 +170,17 @@ update msg model =
     case msg of
         SelectParcel parcel ->
             ( { model | selected = Just parcel }, Cmd.none )
+
+        ToggleHighlight crop ->
+            ( { model
+                | highlighted =
+                    if Just crop == model.highlighted then
+                        Nothing
+                    else
+                        Just crop
+              }
+            , Cmd.none
+            )
 
 
 
@@ -189,6 +203,7 @@ type Styles
 
 type Variations
     = Selected
+    | Highlighted
 
 
 stylesheet =
@@ -223,6 +238,11 @@ stylesheet =
                 [ Color.border blue
                 , Color.background lightBlue
                 ]
+            , Style.variation
+                Highlighted
+                [ Color.border red
+                , Color.background lightRed
+                ]
             ]
         , Style.style TableHeader
             [ Color.text (greyscale 0.7)
@@ -230,7 +250,10 @@ stylesheet =
             , Font.size 15
             ]
         , Style.style Successor
-            [ Font.size 18 ]
+            [ Font.size 18
+            , Style.prop "cursor" "pointer"
+            , Style.variation Highlighted [ Color.text red ]
+            ]
         ]
 
 
@@ -244,7 +267,7 @@ viewEmptyCell row column =
         }
 
 
-viewParcelCell selected ({ boundingBox } as parcel) =
+viewParcelCell highlighted selected ({ boundingBox } as parcel) =
     cell
         { start = boundingBox.topLeft
         , width = boundingBox.width
@@ -254,18 +277,19 @@ viewParcelCell selected ({ boundingBox } as parcel) =
                 ParcelStyle
                 [ onClick (SelectParcel parcel)
                 , vary Selected (selected == Just parcel)
+                , vary Highlighted (List.member highlighted (List.map (\c -> Just c) parcel.crops))
                 ]
                 empty
         }
 
 
-viewSidePanel selected =
+viewSidePanel highlighted selected =
     selected
-        |> Maybe.map viewSelection
+        |> Maybe.map (viewSelection highlighted)
         |> Maybe.withDefault empty
 
 
-viewSelection parcel =
+viewSelection highlighted parcel =
     column
         SidePanel
         [ paddingTop 36, paddingLeft 48 ]
@@ -284,10 +308,23 @@ viewSelection parcel =
               , parcel.crops |> List.map (category >> displayCategoryName) |> String.join ", " |> text
               , parcel.crops
                     |> successors
-                    |> List.map (\crop -> row Successor [ verticalCenter, spacing 12 ] [ cropIcon crop, crop |> displayCropName |> text ])
+                    |> List.map (viewSuccessor highlighted)
                     |> column Text [ spacing 16 ]
               ]
             ]
+        ]
+
+
+viewSuccessor highlighted crop =
+    row
+        Successor
+        [ verticalCenter
+        , spacing 12
+        , onClick (ToggleHighlight crop)
+        , vary Highlighted (highlighted == Just crop)
+        ]
+        [ cropIcon crop
+        , crop |> displayCropName |> text
         ]
 
 
@@ -328,7 +365,7 @@ cropIcon crop =
 
 
 view : Model -> Html Msg
-view { width, height, parcels, selected } =
+view { width, height, parcels, selected, highlighted } =
     layout stylesheet <|
         row Main
             [ padding 36 ]
@@ -339,9 +376,9 @@ view { width, height, parcels, selected } =
                 , cells =
                     List.range 0 (width - 1)
                         |> List.concatMap (\i -> List.range 0 (height - 1) |> List.map (\j -> viewEmptyCell i j))
-                        |> List.append (List.map (viewParcelCell selected) parcels)
+                        |> List.append (List.map (viewParcelCell highlighted selected) parcels)
                 }
-            , viewSidePanel selected
+            , viewSidePanel highlighted selected
             ]
 
 
