@@ -9,6 +9,8 @@ import Style.Font as Font
 import Element exposing (..)
 import Element.Attributes exposing (..)
 import Element.Events exposing (..)
+import Crop exposing (..)
+import Rotation exposing (..)
 
 
 ---- MODEL ----
@@ -26,104 +28,6 @@ type alias Parcel =
     { crops : List Crop
     , boundingBox : BoundingBox
     }
-
-
-type Crop
-    = Tomato
-    | Beetroot
-    | Salad
-    | Radish
-    | Squash
-    | Bean
-    | Peas
-    | Carot
-    | Scallion
-    | Garlic
-    | Shallot
-
-
-type Family
-    = Apiaceae
-    | Asteraceae
-    | Brassicaceae
-    | Chenopodiaceae
-    | Cucurbitaceae
-    | Fabaceae
-    | Alliaceae
-    | Solanaceae
-    | Other
-
-
-family crop =
-    case crop of
-        Tomato ->
-            Solanaceae
-
-        Beetroot ->
-            Chenopodiaceae
-
-        Salad ->
-            Asteraceae
-
-        Radish ->
-            Brassicaceae
-
-        Squash ->
-            Cucurbitaceae
-
-        Bean ->
-            Fabaceae
-
-        Peas ->
-            Fabaceae
-
-        Carot ->
-            Apiaceae
-
-        Scallion ->
-            Alliaceae
-
-        Garlic ->
-            Alliaceae
-
-        Shallot ->
-            Alliaceae
-
-
-displayName crop =
-    case crop of
-        Tomato ->
-            "Tomate"
-
-        Beetroot ->
-            "Betterave"
-
-        Salad ->
-            "Salade"
-
-        Radish ->
-            "Radis"
-
-        Squash ->
-            "Courge"
-
-        Bean ->
-            "Haricot"
-
-        Peas ->
-            "Pois"
-
-        Carot ->
-            "Carotte"
-
-        Scallion ->
-            "Ciboule"
-
-        Garlic ->
-            "Ail"
-
-        Shallot ->
-            "Échalotte"
 
 
 type alias BoundingBox =
@@ -348,8 +252,10 @@ viewSelection parcel =
     column
         SidePanel
         []
-        [ h1 H1 [] (parcel.crops |> List.map displayName |> String.join ", " |> text)
+        [ h1 H1 [] (parcel.crops |> List.map displayCropName |> String.join ", " |> text)
         , el Text [] (text ("Familles : " ++ (parcel.crops |> List.map (family >> toString) |> String.join ", ")))
+        , el Text [] (text ("Catégories alimentaires : " ++ (parcel.crops |> List.map (category >> displayCategoryName) |> String.join ", ")))
+        , el Text [] (text ("Successeurs potentiels : " ++ (parcel.crops |> successors |> List.map displayCropName |> String.join ", ")))
         ]
 
 
