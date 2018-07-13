@@ -42,6 +42,54 @@ type Crop
     | Shallot
 
 
+type Family
+    = Apiaceae
+    | Asteraceae
+    | Brassicaceae
+    | Chenopodiaceae
+    | Cucurbitaceae
+    | Fabaceae
+    | Alliaceae
+    | Solanaceae
+    | Other
+
+
+family crop =
+    case crop of
+        Tomato ->
+            Solanaceae
+
+        Beetroot ->
+            Chenopodiaceae
+
+        Salad ->
+            Asteraceae
+
+        Radish ->
+            Brassicaceae
+
+        Squash ->
+            Cucurbitaceae
+
+        Bean ->
+            Fabaceae
+
+        Peas ->
+            Fabaceae
+
+        Carot ->
+            Apiaceae
+
+        Scallion ->
+            Alliaceae
+
+        Garlic ->
+            Alliaceae
+
+        Shallot ->
+            Alliaceae
+
+
 displayName crop =
     case crop of
         Tomato ->
@@ -228,6 +276,7 @@ type Styles
     | ParcelStyle
     | SidePanel
     | H1
+    | Text
 
 
 type Variations
@@ -296,7 +345,12 @@ viewSidePanel selected =
 
 
 viewSelection parcel =
-    el SidePanel [] (h1 H1 [] (parcel.crops |> List.map displayName |> String.join ", " |> text))
+    column
+        SidePanel
+        []
+        [ h1 H1 [] (parcel.crops |> List.map displayName |> String.join ", " |> text)
+        , el Text [] (text ("Familles : " ++ (parcel.crops |> List.map (family >> toString) |> String.join ", ")))
+        ]
 
 
 view : Model -> Html Msg
